@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  color: #eee;
+  background: linear-gradient(#000, #111);
+}
+header {
+  padding: 8px 16px;
+  background: #0b0b0b;
+  border-bottom: 1px solid #222;
+}
+main {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+}
+canvas#game {
+  background: linear-gradient(#5c7,#7ad);
+  image-rendering: pixelated;
+  border: 2px solid #333;
+}
+#admin {
+  width: 320px;
+  padding: 8px;
+  background: rgba(20,20,20,0.95);
+  border: 1px solid #222;
+  height: 520px;
+  overflow: auto;
+}
+.charItem {
+  padding: 6px;
+  border-bottom: 1px dashed #222;
+}
+.charButtons button {
+  margin-right: 6px;
+}
+#selectedEditor input {
+  width: 100%;
+}
+.adminButtons {
+  margin-bottom: 8px;
+}
+footer {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #bbb;
+}

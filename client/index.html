@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Vitrina de Personas Diminutas — MVP</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header><h1>Vitrina de Personas Diminutas — MVP</h1></header>
+    <main>
+      <canvas id="game" width="900" height="400"></canvas>
+      <aside id="admin">
+        <h2>Panel admin</h2>
+        <div class="adminButtons">
+          <button id="btnPause">Pausar</button>
+          <button id="btnResume">Continuar</button>
+          <button id="btnExport">Exportar JSON</button>
+        </div>
+        <h3>Personajes</h3>
+        <div id="charList"></div>
+        <div id="selectedEditor"></div>
+      </aside>
+    </main>
+    <footer>Idioma: español — IA: mock local gratuito</footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
