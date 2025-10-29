@@ -31,7 +31,7 @@ app.post('/api/characters/:id', (req, res) => {
   const id = req.params.id;
   const idx = characters.findIndex(c => c.id === id);
   if (idx === -1) return res.status(404).json({ error: 'No encontrado' });
-  const allowed = ['name', 'age', 'profession', 'traits', 'presentation', 'color'];
+  const allowed = ['name', 'age', 'profession', 'traits', 'presentation', 'color', 'palette', 'accessory', 'scale'];
   for (const k of allowed) if (req.body[k] !== undefined) characters[idx][k] = req.body[k];
   res.json(characters[idx]);
 });
@@ -54,6 +54,8 @@ io.on('connection', (socket) => {
       if (action.type === 'speak' || action.text) {
         c.speech = { text: action.text || '', until: Date.now() + (action.duration || 4000) };
       }
+      // set animation from admin-forced action
+      setAnimationFromAction(c, action);
     }
   });
   socket.on('admin:updateCharacter', ({ id, updates }) => {
@@ -66,6 +68,31 @@ io.on('connection', (socket) => {
 
 // Utility: clamp
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+function setAnimationFromAction(c, action) {
+  if (!c.animation) c.animation = { type: 'idle', frame: 0, lastAt: Date.now() };
+  switch (action.type) {
+    case 'move':
+      c.animation.type = 'walk';
+      break;
+    case 'idle':
+      c.animation.type = 'idle';
+      break;
+    case 'speak':
+      c.animation.type = 'talk';
+      break;
+    case 'interact':
+      c.animation.type = 'talk';
+      break;
+    case 'changeState':
+      // keep current animation
+      break;
+    default:
+      if (action.jump) c.animation.type = 'jump';
+      break;
+  }
+  c.animation.lastAt = Date.now();
+}
 
 // Physics loop
 setInterval(() => {
@@ -97,6 +124,11 @@ setInterval(() => {
       c.y = VITRINA.height - c.h/2;
       c.vy = 0;
       c.onGround = true;
+      // if landed, and was jumping, return to idle/walk
+      if (c.animation && c.animation.type === 'jump') {
+        c.animation.type = (c.vx !== 0) ? 'walk' : 'idle';
+        c.animation.lastAt = Date.now();
+      }
     }
     // walls
     if (c.x - c.w/2 < 0) { c.x = c.w/2; c.vx = 0; }
@@ -104,6 +136,10 @@ setInterval(() => {
     // action duration expiration
     if (c.currentAction && c.currentAction._expiresAt && Date.now() > c.currentAction._expiresAt) {
       c.currentAction = { type: 'idle' };
+      // update animation to idle
+      if (!c.animation) c.animation = { type: 'idle', frame: 0, lastAt: Date.now() };
+      c.animation.type = 'idle';
+      c.animation.lastAt = Date.now();
     }
     // speech expiration
     if (c.speech && c.speech.until && Date.now() > c.speech.until) c.speech = null;
@@ -169,6 +205,8 @@ setInterval(async () => {
     if (!p) continue;
     c.currentAction = p;
     c.lastAI = Date.now();
+    // set animation based on action
+    setAnimationFromAction(c, p);
     if (p.type === 'speak' || p.text) {
       c.speech = { text: p.text || '', until: Date.now() + (p.duration || 4000) };
     }
